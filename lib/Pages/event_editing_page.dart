@@ -94,8 +94,15 @@ class _EventEditingPageState extends State<EventEditingPage> {
   Widget buildFrom() => Row(
         children: [
           Expanded(
+            flex: 2,
             child: buildDropdownField(
               text: Utils.toDate(fromDate),
+              onClicked: () {},
+            ),
+          ),
+          Expanded(
+            child: buildDropdownField(
+              text: Utils.toTime(fromDate),
               onClicked: () {},
             ),
           ),
@@ -107,6 +114,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
     ListTile(
       title: Text(text),
       trailing: Icon(Icons.arrow_drop_down),
+      onTap: onClicked,
     );
 
 }
