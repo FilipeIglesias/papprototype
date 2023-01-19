@@ -1,6 +1,6 @@
-# papprototype
+# Pap Prototype
 
-A new Flutter project.
+This is my Flutter app named TimeZone. It´s a evaluation project
 
 ## Getting Started
 
