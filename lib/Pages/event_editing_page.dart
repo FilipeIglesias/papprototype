@@ -67,8 +67,8 @@ class _EventEditingPageState extends State<EventEditingPage> {
   List<Widget> buildEditingActions() => [
         ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-                primary: Colors.transparent, shadowColor: Colors.transparent),
-            onPressed: (() {}),
+                primary: Colors.transparent, shadowColor: Colors.transparent,),
+            onPressed: saveForm,
             icon: Icon(Icons.done),
             label: Text('SAVE'))
       ];
@@ -79,7 +79,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
           border: UnderlineInputBorder(),
           hintText: 'Add Title',
         ),
-        onFieldSubmitted: (_) {},
+        onFieldSubmitted: (_) => saveForm(),
         validator: (title) =>
             title != null && title.isEmpty ? 'Title cannot be empty' : null,
         controller: titleController,
@@ -219,4 +219,22 @@ class _EventEditingPageState extends State<EventEditingPage> {
           child,
         ],
       );
+
+  Future saveForm() async {
+    final isValid = _formKey.currentState!.validate();
+
+    if (isValid) {
+      final event = Event(
+        title: titleController.text,
+        description: 'Description',
+        from: fromDate,
+        to: toDate,
+      );
+
+      final provider = Provider.of<EventProvider>(context, listen: false);
+      provider.addEvent(event);
+
+      Navigator.of(context).pop();
+    }
+  }
 }

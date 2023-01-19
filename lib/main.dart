@@ -3,6 +3,8 @@ import 'package:papprototype/Pages/Account.dart';
 import 'package:papprototype/Pages/Calendar.dart';
 import 'package:papprototype/Pages/HomePage.dart';
 import 'package:papprototype/Pages/Reminders.dart';
+import 'package:papprototype/provider/event_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,8 +14,9 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context) => ChangeNotifierProvider(
+    create: (context) => EventProvider(),
+    child: MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TimeZone',
       theme: ThemeData(
@@ -22,9 +25,9 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: NavigationBar(),
+      ),
     );
   }
-}
 
 class NavigationBar extends StatefulWidget {
   const NavigationBar({super.key});
