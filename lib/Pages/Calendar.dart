@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:papprototype/Pages/event_editing_page.dart';
+import 'package:papprototype/Pages/tasks_widget.dart';
 import 'package:papprototype/provider/event_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -27,6 +28,13 @@ class _CalendarPageState extends State<CalendarPage> {
               child: SfCalendar(
                 dataSource: EventDataSource(events),
                 view: CalendarView.month,
+                onLongPress: (details) {
+                  final provider =
+                      Provider.of<EventProvider>(context, listen: false);
+
+                  provider.setDate(details.date!);
+                  showModalBottomSheet(context: context, builder: (context) => TasksWidget(),);
+                },
               ),
             ),
             FloatingActionButton(
