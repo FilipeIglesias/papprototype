@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:papprototype/Pages/event_viewing_page.dart';
 import 'package:papprototype/model/event_data_source.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -27,10 +28,56 @@ class _TasksWidgetState extends State<TasksWidget> {
     }
 
     return SfCalendarTheme(
-      data: SfCalendarThemeData(),
+      data: SfCalendarThemeData(
+          timeTextStyle: TextStyle(
+        fontSize: 16,
+        color: Colors.black,
+      )),
       child: SfCalendar(
         view: CalendarView.timelineDay,
+        headerHeight: 0,
+        todayHighlightColor: Colors.black,
         dataSource: EventDataSource(provider.events),
+        initialDisplayDate: provider.selectedDate,
+        appointmentBuilder: appointmentBuilder,
+        selectionDecoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.2),
+        ),
+        onTap: (details) {
+          if (details.appointments == null) return;
+
+          final event = details.appointments!.first;
+
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => EventViewingPage(event: event),),);
+        },
+      ),
+    );
+  }
+
+  Widget appointmentBuilder(
+    BuildContext context,
+    CalendarAppointmentDetails details,
+  ) {
+    final event = details.appointments.first;
+
+    return Container(
+      width: details.bounds.width,
+      height: details.bounds.height,
+      decoration: BoxDecoration(
+        color: event.backgroundColor.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Text(
+          event.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
