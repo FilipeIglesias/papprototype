@@ -12,32 +12,37 @@ class _AccountState extends State<Account> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              const SizedBox(height: 10.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: 0, left: 10),
-                    child: Text(
-                      'Settings',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 40),
+        child: Container(
+          margin: const EdgeInsets.only(
+            top: 50,
+          ),
+          child: Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 10.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 0, left: 10),
+                      child: Text(
+                        'Settings',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontSize: 40),
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 0, left: 160),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.orangeAccent,
-                      radius: 35,
-                      backgroundImage: AssetImage('images/pfp.png'),
+                    Padding(
+                      padding: EdgeInsets.only(top: 0, left: 160),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.orangeAccent,
+                        radius: 35,
+                        backgroundImage: AssetImage('images/pfp.png'),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

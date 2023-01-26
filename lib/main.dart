@@ -3,8 +3,7 @@ import 'package:papprototype/Pages/Account.dart';
 import 'package:papprototype/Pages/Calendar.dart';
 import 'package:papprototype/Pages/HomePage.dart';
 import 'package:papprototype/Pages/Reminders.dart';
-import 'package:papprototype/provider/event_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:papprototype/services/notification_services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,20 +13,13 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) => ChangeNotifierProvider(
-    create: (context) => EventProvider(),
-    child: MaterialApp(
+  Widget build(BuildContext context) {
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'TimeZone',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: const Color(0xFF0A2647),
-        ),
-      ),
       home: NavigationBar(),
-      ),
     );
   }
+}
 
 class NavigationBar extends StatefulWidget {
   const NavigationBar({super.key});
@@ -38,13 +30,14 @@ class NavigationBar extends StatefulWidget {
 
 class _NavigationBarState extends State<NavigationBar> {
   int _currentIndex = 0;
+  
   final List<Widget> _children = [
     HomePage(),
     CalendarPage(),
     ReminderPage(),
     Account(),
   ];
-
+  
   void OnTappedBar(int index) {
     setState(() {
       _currentIndex = index;
@@ -54,9 +47,6 @@ class _NavigationBarState extends State<NavigationBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TimeZone'),
-      ),
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         onTap: OnTappedBar,
