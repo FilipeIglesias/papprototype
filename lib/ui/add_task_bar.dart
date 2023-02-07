@@ -165,6 +165,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
               ),
               Row(
                 children: [
+                  //Event Select
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -179,7 +180,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         children: List<Widget>.generate(3, (int index) {
                           return GestureDetector(
                             onTap: () {
-                              _selectedColor = index;
+                              setState(() {
+                                _selectedColor = index;
+                              });
                             },
                             child: Padding(
                               padding: const EdgeInsets.only(right: 8.0),
@@ -190,6 +193,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                     : index == 1
                                         ? WorkClr
                                         : OtherClr,
+                                child: _selectedColor==index?Icon(Icons.done,
+                                    color: Colors.white, size: 16):Container(),
                               ),
                             ),
                           );
@@ -234,7 +239,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
     );
   }
 
-  //Data
+  //Day
   _getDateFromUser() async {
     DateTime? _pickerDate = await showDatePicker(
       context: context,
@@ -252,7 +257,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       print("It´s null or something is wrong");
     }
   }
-
+  //Hour
   _getTimeFromUser({required bool isStartTime}) async {
     var pickedTime = await _showTimePicker();
     String _formatedTime = pickedTime.format(context);

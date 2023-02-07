@@ -5,10 +5,9 @@ const Color bluishClr = Color(0xFF4e5ae8);
 const primaryClr = bluishClr;
 
 //Event colors
-const Color PersonalClr = Color(0x397006);
-const Color WorkClr = Color(0x700639);
-const Color OtherClr = Color(0x637006);
-
+const Color PersonalClr = Color.fromARGB(255, 242, 222, 186);
+const Color WorkClr = Color.fromARGB(255, 130, 0, 0);
+const Color OtherClr = Color.fromARGB(255, 78, 108, 80);
 
 TextStyle get subHeadingStyle {
   return GoogleFonts.lato(
