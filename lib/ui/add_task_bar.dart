@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:papprototype/ui/theme.dart';
 import 'package:papprototype/ui/widgets/input_field.dart';
@@ -13,6 +15,8 @@ class AddTaskPage extends StatefulWidget {
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String _endTime = "9.30 PM";
   String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
@@ -31,6 +35,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
     "Monthly",
   ];
   int _selectedColor = 0;
+  bool _allRequired = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,8 +54,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 'Add Tasks',
                 style: headingStyle,
               ),
-              MyInputField(title: "Title", hint: "Enter your title"),
-              MyInputField(title: "Note", hint: "Enter your note"),
+              MyInputField(
+                title: "Title",
+                hint: "Enter your title",
+                controller: _titleController,
+              ),
+              MyInputField(
+                title: "Note",
+                hint: "Enter your note",
+                controller: _noteController,
+              ),
               MyInputField(
                 title: "Date",
                 hint: DateFormat.yMMMMd().format(_selectedDate),
@@ -164,50 +177,108 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 height: 18,
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  //Event Select
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Type",
-                        style: titleStyle,
-                      ),
-                      SizedBox(
-                        height: 8.0,
-                      ),
-                      Wrap(
-                        children: List<Widget>.generate(3, (int index) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedColor = index;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: CircleAvatar(
-                                radius: 14,
-                                backgroundColor: index == 0
-                                    ? PersonalClr
-                                    : index == 1
-                                        ? WorkClr
-                                        : OtherClr,
-                                child: _selectedColor==index?Icon(Icons.done,
-                                    color: Colors.white, size: 16):Container(),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
+                  _typeEvent(),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryClr,
+                          fixedSize: Size(120, 60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          )),
+                      onPressed: () {
+                        _validateDate();
+                        if (_allRequired == true) {
+                          _sendEvent();
+                        }
+                      },
+                      child: Text('Create Task')),
                 ],
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  _sendEvent() {
+    final event = <String, dynamic>{
+      "title": _titleController.text,
+      "note": _noteController.text,
+      "date": _selectedDate,
+      "start": _startTime,
+      "end": _endTime,
+      "reminder": _selectedRemind,
+      "repeat": _selectedRepeat,
+    };
+
+    // Add a new document with a generated ID
+
+    FirebaseFirestore.instance.collection("event").add(event).then(
+        (DocumentReference doc) =>
+            print('DocumentSnapshot added with ID: ${doc.id}'));
+  }
+
+  _validateDate() {
+    if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
+      Get.back();
+      _allRequired = true;
+    } else if (_titleController.text.isNotEmpty ||
+        _noteController.text.isNotEmpty) {
+      Get.snackbar(
+        "Required",
+        "All fields are required!",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+        colorText: Colors.pink,
+        icon: Icon(
+          Icons.warning_amber_rounded,
+          color: Colors.red,
+        ),
+      );
+    }
+  }
+
+  _typeEvent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Type",
+          style: titleStyle,
+        ),
+        SizedBox(
+          height: 8.0,
+        ),
+        Wrap(
+          children: List<Widget>.generate(3, (int index) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedColor = index;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: CircleAvatar(
+                  radius: 14,
+                  backgroundColor: index == 0
+                      ? PersonalClr
+                      : index == 1
+                          ? WorkClr
+                          : OtherClr,
+                  child: _selectedColor == index
+                      ? Icon(Icons.done, color: Colors.white, size: 16)
+                      : Container(),
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 
@@ -257,6 +328,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       print("It´s null or something is wrong");
     }
   }
+
   //Hour
   _getTimeFromUser({required bool isStartTime}) async {
     var pickedTime = await _showTimePicker();

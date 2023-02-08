@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get/route_manager.dart';
 import 'package:papprototype/Pages/Account.dart';
 import 'package:papprototype/Pages/Calendar.dart';
 import 'package:papprototype/Pages/HomePage.dart';
 import 'package:papprototype/Pages/Reminders.dart';
 import 'package:papprototype/services/notification_services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -14,10 +21,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: NavigationBar(),
     );
+    /*return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: NavigationBar(),
+    );*/
   }
 }
 
@@ -30,14 +41,14 @@ class NavigationBar extends StatefulWidget {
 
 class _NavigationBarState extends State<NavigationBar> {
   int _currentIndex = 0;
-  
+
   final List<Widget> _children = [
     HomePage(),
     CalendarPage(),
     ReminderPage(),
     Account(),
   ];
-  
+
   void OnTappedBar(int index) {
     setState(() {
       _currentIndex = index;

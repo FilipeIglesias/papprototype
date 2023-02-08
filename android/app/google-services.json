@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "182829506425",
+    "firebase_url": "https://timezone-b9cf8-default-rtdb.firebaseio.com",
+    "project_id": "timezone-b9cf8",
+    "storage_bucket": "timezone-b9cf8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:182829506425:android:1c326ed6e2584f0412d9a8",
+        "android_client_info": {
+          "package_name": "com.example.papprototype"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "182829506425-ls51b49nrmch2tinfl5uo8cb3qk88kji.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBOfFBqMjw9PteXJ81B1r3XkVesmioPec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "182829506425-ls51b49nrmch2tinfl5uo8cb3qk88kji.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "182829506425-otvtqj8147rkceb5gsri6rb3er5blddb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.papprototype"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:papprototype/ui/add_task_bar.dart';
@@ -18,6 +20,7 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Container(
         margin: const EdgeInsets.only(
           top: 50,
@@ -26,11 +29,24 @@ class _CalendarPageState extends State<CalendarPage> {
           children: [
             _addTaskBar(context),
             _addDateBar(),
+            _showTasks(),
           ],
         ),
       ),
     );
   }
+
+  _showTasks() {
+    return Expanded(
+      child: Container(
+              width: 100,
+              height: 50,
+              color: Colors.green,
+              margin: const EdgeInsets.only(bottom: 10),
+            ),
+          );
+        
+      }
 
   //Datas em scroll
   _addDateBar() {
@@ -93,7 +109,7 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
           ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryClr,
+                  backgroundColor: primaryClr,
                   fixedSize: Size(120, 60),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
