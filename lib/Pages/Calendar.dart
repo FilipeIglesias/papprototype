@@ -43,10 +43,41 @@ class _CalendarPageState extends State<CalendarPage> {
               height: 50,
               color: Colors.green,
               margin: const EdgeInsets.only(bottom: 10),
-            ),
-          );
+              child: StreamBuilder(
+                stream:
+                    FirebaseFirestore.instance.collection('event').snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(itemCount: snapshot.data?.docs.length, itemBuilder: (context, index) => Container(
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 120,
+                            child: Text(snapshot.data?.docs[index]['title']),
+                          ),
+                          Container(width: 120,
+                            child: Text(snapshot.data?.docs[index]['note']),
+                          ),
+                          Container(width: 120,
+                            child: Text((snapshot.data?.docs[index]['date']).toString()),
+                          ),
+                          Container(width: 120,
+                            child: Text((snapshot.data?.docs[index]['date']).toString()),
+                          ),
+                        ],
+                      ),
+                    ), );
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
+            )
+            );
+          }
         
-      }
+      
+
 
   //Datas em scroll
   _addDateBar() {
