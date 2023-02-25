@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:papprototype/ui/add_task_bar.dart';
 import 'package:papprototype/ui/theme.dart';
+import 'package:papprototype/ui/widgets/input_field.dart';
+import '../ui/edit_event.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -38,46 +40,80 @@ class _CalendarPageState extends State<CalendarPage> {
 
   _showTasks() {
     return Expanded(
-      child: Container(
-              width: 100,
-              height: 50,
-              color: Colors.green,
-              margin: const EdgeInsets.only(bottom: 10),
-              child: StreamBuilder(
-                stream:
-                    FirebaseFirestore.instance.collection('event').snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.hasData) {
-                    return ListView.builder(itemCount: snapshot.data?.docs.length, itemBuilder: (context, index) => Container(
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 120,
-                            child: Text(snapshot.data?.docs[index]['title']),
-                          ),
-                          Container(width: 120,
-                            child: Text(snapshot.data?.docs[index]['note']),
-                          ),
-                          Container(width: 120,
-                            child: Text((snapshot.data?.docs[index]['date']).toString()),
-                          ),
-                          Container(width: 120,
-                            child: Text((snapshot.data?.docs[index]['date']).toString()),
-                          ),
-                        ],
+      child: StreamBuilder(
+        stream: FirebaseFirestore.instance.collection('event').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+              itemCount: snapshot.data?.docs.length,
+              itemBuilder: (context, index) {
+                String? id = snapshot.data?.docs[index].id;
+                Timestamp t = snapshot.data?.docs[index]['date'];
+                DateTime d = t.toDate();
+                return Container(
+                  width: 100,
+                  height: 50,
+                  color: Colors.green,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 80,
+                        child: Text(snapshot.data?.docs[index]['title']),
                       ),
-                    ), );
-                  } else {
-                    return Container();
-                  }
-                },
-              ),
-            )
-            );
-          }
-        
-      
+                      Container(
+                        width: 80,
+                        child: Text(snapshot.data?.docs[index]['note']),
+                      ),
+                      Container(
+                        width: 80,
+                        child: Text(d.toString()),
+                      ),
+                      Container(
+                        width: 80,
+                        child: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            /*final docEvent = FirebaseFirestore.instance
+                                .collection('event')
+                                .doc(id);
 
+                            docEvent.update({
+                              'title': 'Iglesias',
+                              'note': 'lel',
+                            });*/
+                            Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => editEvent(snapshot)));
+                            //const editEvent();
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 80,
+                        child: IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () async {
+                            await FirebaseFirestore.instance
+                                .collection('event')
+                                .doc(snapshot.data?.docs[index].id)
+                                .delete();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          } else {
+            return Container();
+          }
+        },
+      ),
+    );
+  }
 
   //Datas em scroll
   _addDateBar() {
