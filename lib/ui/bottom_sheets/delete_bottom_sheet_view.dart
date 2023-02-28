@@ -34,7 +34,7 @@ class DeleteBottomSheetView extends StatelessWidget {
                   viewModel.deleteCompletedTasks();
                   Navigator.of(context).pop();
                 },
-                child: Text("Delete Completed"),
+                child: Text("Delete Selected"),
                 style: ElevatedButton.styleFrom(
                     foregroundColor: viewModel.clrvl1,
                     backgroundColor: viewModel.clrvl3,
