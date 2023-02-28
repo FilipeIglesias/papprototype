@@ -83,9 +83,11 @@ class _CalendarPageState extends State<CalendarPage> {
                               'note': 'lel',
                             });*/
                             Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => editEvent(snapshot)));
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => editEvent(snapshot),
+                              ),
+                            );
                             //const editEvent();
                           },
                         ),

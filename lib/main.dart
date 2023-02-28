@@ -6,6 +6,8 @@ import 'package:papprototype/Pages/HomePage.dart';
 import 'package:papprototype/Pages/Reminders.dart';
 import 'package:papprototype/services/notification_services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:papprototype/ui/view_models/app_view_model.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -13,7 +15,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => AppViewModel(), child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

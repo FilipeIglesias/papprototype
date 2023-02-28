@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:papprototype/ui/add_task_view.dart';
+import 'package:papprototype/ui/header_view.dart';
+import 'package:papprototype/ui/task_info_view.dart';
 
-class ReminderPage extends StatefulWidget {
+import '../ui/task_list_view.dart';
+
+class ReminderPage extends StatelessWidget {
   const ReminderPage({super.key});
-
-  @override
-  State<ReminderPage> createState() => _ReminderPageState();
-}
-
-class _ReminderPageState extends State<ReminderPage> {
-  bool? _isChecked = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: CheckboxListTile(
-          title: const Text('This is a reminder'),
-          value: _isChecked,
-          onChanged: (bool? newValue) {
-            setState(() {
-              _isChecked = newValue;
-            });
-          },
-          activeColor: Colors.orangeAccent,
-          checkColor: Colors.white,
-          tileColor: Colors.black12,
-          subtitle: const Text('This is a subtitle'),
-          controlAffinity: ListTileControlAffinity.leading,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+
+            //Header
+            Expanded(
+                child: HeaderView(),
+                flex: 1),
+
+            //Task Info
+            Expanded(
+                child: TaskInfoView(),
+                flex: 1),
+
+            //Task List View
+            Expanded(
+                child: TaskListView(),
+                flex: 7),
+          ],
         ),
       ),
+      floatingActionButton: const AddTaskView(),
     );
   }
 }

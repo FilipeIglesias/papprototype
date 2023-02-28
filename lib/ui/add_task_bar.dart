@@ -206,6 +206,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   _sendEvent() {
     final event = <String, dynamic>{
+      "id": null,
       "title": _titleController.text,
       "note": _noteController.text,
       "date": _selectedDate,
@@ -218,8 +219,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
     // Add a new document with a generated ID
 
     FirebaseFirestore.instance.collection("event").add(event).then(
-        (DocumentReference doc) =>
-            print('DocumentSnapshot added with ID: ${doc.id}'));
+      (DocumentReference doc) {
+        doc.update({"id": doc.id});
+        print('DocumentSnapshot added with ID: ${doc.id}');
+      },
+    );
   }
 
   _validateDate() {
