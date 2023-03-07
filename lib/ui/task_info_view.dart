@@ -27,19 +27,49 @@ class TaskInfoView extends StatelessWidget {
                       flex: 2,
                       child: Align(
                         alignment: Alignment.center,
-                        child: FittedBox(child: Text("${viewModel.numTasks}", style: TextStyle(fontSize: 28, color: viewModel.clrvl3, fontWeight: FontWeight.bold),))),
+                        child: FutureBuilder<int?>(
+                          future: viewModel.numTasks(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<int?> snapshot) {
+                            if (snapshot.hasData) {
+                              return FittedBox(
+                                child: Text(
+                                  "${snapshot.data}",
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    color: viewModel.clrvl3,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              );
+                            } else if (snapshot.hasError) {
+                              return Text("Error: ${snapshot.error}");
+                            } else {
+                              return CircularProgressIndicator();
+                            }
+                          },
+                        ),
+                      ),
                     ),
                     Expanded(
                       flex: 1,
                       child: Align(
-                        alignment: Alignment.topCenter,
-                        child: FittedBox(child: Text("Total Tasks", style: TextStyle(color: viewModel.clrvl4, fontWeight: FontWeight.w600),))),
+                          alignment: Alignment.topCenter,
+                          child: FittedBox(
+                              child: Text(
+                            "Total Tasks",
+                            style: TextStyle(
+                                color: viewModel.clrvl4,
+                                fontWeight: FontWeight.w600),
+                          ))),
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(width: 20,),
+            SizedBox(
+              width: 20,
+            ),
             //Remaining
             Expanded(
               flex: 1,
@@ -54,13 +84,41 @@ class TaskInfoView extends StatelessWidget {
                       flex: 2,
                       child: Align(
                         alignment: Alignment.center,
-                        child: FittedBox(child: Text("${viewModel.numTasksRemaining}", style: TextStyle(fontSize: 28, color: viewModel.clrvl3, fontWeight: FontWeight.bold),))),
+                        child: StreamBuilder<int?>(
+                          stream: viewModel.numTasksRemaining(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<int?> snapshot) {
+                            if (snapshot.hasData) {
+                              return FittedBox(
+                                child: Text(
+                                  "${snapshot.data}",
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    color: viewModel.clrvl3,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              );
+                            } else if (snapshot.hasError) {
+                              return Text("Error: ${snapshot.error}");
+                            } else {
+                              return CircularProgressIndicator();
+                            }
+                          },
+                        ),
+                      ),
                     ),
                     Expanded(
                       flex: 1,
                       child: Align(
-                        alignment: Alignment.topCenter,
-                        child: FittedBox(child: Text("Remaining", style: TextStyle(color: viewModel.clrvl4, fontWeight: FontWeight.w600),))),
+                          alignment: Alignment.topCenter,
+                          child: FittedBox(
+                              child: Text(
+                            "Remaining",
+                            style: TextStyle(
+                                color: viewModel.clrvl4,
+                                fontWeight: FontWeight.w600),
+                          ))),
                     ),
                   ],
                 ),

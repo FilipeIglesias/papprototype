@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -11,30 +12,62 @@ class AppViewModel extends ChangeNotifier {
   Color clrvl3 = Colors.grey.shade800;
   Color clrvl4 = Colors.grey.shade900;
 
-  int get numTasks => tasks.length;
+  Future<int?> numTasks() async {
+    int numTasks;
+    try {
+      final QuerySnapshot<Map<String, dynamic>> snapshot =
+          await FirebaseFirestore.instance.collection('reminders').get();
 
-  int get numTasksRemaining => tasks
-      .where(
-        (task) => !task.complete,
-      )
-      .length;
-
-  void addTask(Task newTask) {
-    tasks.add(newTask);
-    notifyListeners();
+      numTasks = snapshot.size;
+      return numTasks;
+    } catch (e) {
+      print('Error getting snapshot count: $e');
+      return null;
+    }
   }
 
-  bool getTaskValue(int taskIndex) {
-    return tasks[taskIndex].complete;
+  Stream<int> numTasksRemaining() {
+  return FirebaseFirestore.instance.collection('reminders')
+    .snapshots()
+    .map((snapshot) {
+      final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents = snapshot.docs;
+      final int numRemaining = documents.where((doc) => doc['completed'] == false).length;
+      return numRemaining;
+    });
+}
+
+  Future<List<bool>> getCompletedValues() async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final CollectionReference remindersCollection =
+        firestore.collection('reminders');
+
+    final querySnapshot = await remindersCollection.get();
+    final List<bool> completedValues = [];
+
+    for (final doc in querySnapshot.docs) {
+      final completed = doc['completed'] as bool?;
+      if (completed != null) {
+        completedValues.add(completed);
+      }
+    }
+
+    return completedValues;
   }
 
-  void setTaskValue(int taskIndex, bool taskValue) {
-    tasks[taskIndex].complete = taskValue;
-    notifyListeners();
+  Future<bool> getTaskValue(int index) async {
+    final completedValues = await getCompletedValues();
+    return completedValues[index];
   }
 
-  String getTaskTitle(int taskIndex) {
-    return tasks[taskIndex].title;
+  void updateTaskCompletion(String documentId, bool taskValue) {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final DocumentReference taskDocument =
+        firestore.collection('reminders').doc(documentId);
+
+    taskDocument
+        .update({'completed': taskValue})
+        .then((value) => print('Task completion updated successfully'))
+        .catchError((error) => print('Error updating task completion: $error'));
   }
 
   void deleteTask(int taskIndex) {
@@ -42,14 +75,54 @@ class AppViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteAllTasks() {
-    tasks.clear();
-    notifyListeners();
+  void deleteAllTasks() async {
+    final QuerySnapshot remindersSnapshot =
+        await FirebaseFirestore.instance.collection('reminders').get();
+
+    final List<DocumentSnapshot> remindersDocs = remindersSnapshot.docs;
+
+    for (DocumentSnapshot doc in remindersDocs) {
+      await doc.reference.delete();
+    }
   }
 
-  void deleteCompletedTasks() {
-    tasks = tasks.where((task) => !task.complete).toList();
-    notifyListeners();
+  void deleteCompletedTasks() async {
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('reminders').get();
+      final docs = snapshot.docs;
+      final completedDocs = docs.where((doc) => doc['completed'] == true);
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (final doc in completedDocs) {
+        final docRef =
+            FirebaseFirestore.instance.collection('reminders').doc(doc.id);
+        batch.delete(docRef);
+      }
+
+      await batch.commit();
+    } catch (e) {
+      print('Error deleting completed tasks: $e');
+    }
+  }
+
+  void sendTask(Task newTask) {
+    final taskMap = <String, dynamic>{
+      "title": newTask.title,
+      "completed": false,
+    };
+
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    firestore
+        .collection("reminders")
+        .add(taskMap)
+        .then((DocumentReference doc) {
+      doc.update({"id": doc.id});
+      print('DocumentSnapshot added with ID: ${doc.id}');
+    }).catchError((error) {
+      print('Error adding task: $error');
+    });
   }
 
   void bottomSheetBuilder(Widget bottomSheetView, BuildContext context) {
@@ -63,3 +136,20 @@ class AppViewModel extends ChangeNotifier {
     );
   }
 }
+
+/*void updateCompleted(bool value) async {
+  final updateComplete = <String, dynamic>{
+    "completed": value,
+  };
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  var snapshots = firestore.collection('reminders').snapshots();
+
+  if (snapshot.hasData) {
+    return ListView.builder(
+        itemCount: snapshot.data?.docs.length,
+        itemBuilder: (context, index) {
+          String id = snapshots.data?.docs[index]['id'];
+        });
+  }
+}*/
