@@ -12,7 +12,7 @@ class AppViewModel extends ChangeNotifier {
   Color clrvl3 = Colors.grey.shade800;
   Color clrvl4 = Colors.grey.shade900;
 
-  Future<int?> numTasks() async {
+  Future<int> numTasks() async {
     int numTasks;
     try {
       final QuerySnapshot<Map<String, dynamic>> snapshot =
@@ -22,19 +22,35 @@ class AppViewModel extends ChangeNotifier {
       return numTasks;
     } catch (e) {
       print('Error getting snapshot count: $e');
-      return null;
+      return 0;
     }
   }
 
-  Stream<int> numTasksRemaining() {
-  return FirebaseFirestore.instance.collection('reminders')
-    .snapshots()
-    .map((snapshot) {
-      final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents = snapshot.docs;
-      final int numRemaining = documents.where((doc) => doc['completed'] == false).length;
+  Stream<int> numTask() {
+    return FirebaseFirestore.instance
+        .collection('reminders')
+        .snapshots()
+        .map((snapshot) {
+          final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
+          snapshot.docs;
+           final int numRemaining =
+          documents.length;
       return numRemaining;
     });
-}
+  }
+
+  Stream<int> numTasksRemaining() {
+    return FirebaseFirestore.instance
+        .collection('reminders')
+        .snapshots()
+        .map((snapshot) {
+      final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
+          snapshot.docs;
+      final int numRemaining =
+          documents.where((doc) => doc['completed'] == false).length;
+      return numRemaining;
+    });
+  }
 
   Future<List<bool>> getCompletedValues() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -70,10 +86,7 @@ class AppViewModel extends ChangeNotifier {
         .catchError((error) => print('Error updating task completion: $error'));
   }
 
-  void deleteTask(int taskIndex) {
-    tasks.removeAt(taskIndex);
-    notifyListeners();
-  }
+  void deleteTask(int taskIndex) {}
 
   void deleteAllTasks() async {
     final QuerySnapshot remindersSnapshot =

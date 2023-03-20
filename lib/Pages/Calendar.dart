@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +9,7 @@ import 'package:papprototype/ui/add_task_bar.dart';
 import 'package:papprototype/ui/theme.dart';
 import 'package:papprototype/ui/widgets/input_field.dart';
 import '../ui/edit_event.dart';
+import '../ui/EditEvent.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -18,7 +20,6 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   DateTime _selectedDate = DateTime.now();
-  
 
   @override
   Widget build(BuildContext context) {
@@ -48,61 +49,142 @@ class _CalendarPageState extends State<CalendarPage> {
             return ListView.builder(
               itemCount: snapshot.data?.docs.length,
               itemBuilder: (context, index) {
-                String? id = snapshot.data?.docs[index].id;
+                String? id = snapshot.data?.docs[index]['id'];
                 Timestamp t = snapshot.data?.docs[index]['date'];
                 DateTime d = t.toDate();
+                int start_hour = int.parse(snapshot.data?.docs[index]['start_hour']);
+                int start_minute = int.parse(snapshot.data?.docs[index]['start_minute']);
+                int end_hour = int.parse(snapshot.data?.docs[index]['end_hour']);
+                int end_minute = int.parse(snapshot.data?.docs[index]['end_minute']);
                 return Container(
-                  width: 100,
-                  height: 50,
-                  color: Colors.green,
-                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 1,
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
                   child: Row(
                     children: [
-                      Container(
-                        width: 80,
-                        child: Text(snapshot.data?.docs[index]['title']),
-                      ),
-                      Container(
-                        width: 80,
-                        child: Text(snapshot.data?.docs[index]['note']),
-                      ),
-                      Container(
-                        width: 80,
-                        child: Text(d.toString()),
-                      ),
-                      Container(
-                        width: 80,
-                        child: IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            /*final docEvent = FirebaseFirestore.instance
-                                .collection('event')
-                                .doc(id);
-
-                            docEvent.update({
-                              'title': 'Iglesias',
-                              'note': 'lel',
-                            });*/
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => editEvent(snapshot),
+                      Flexible(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              snapshot.data?.docs[index]['title'],
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'SFProDisplay',
                               ),
-                            );
-                            //const editEvent();
-                          },
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              (start_hour >= 10
+                                      ? start_hour.toString()
+                                      : "0" + start_hour.toString()) +
+                                  ":" +
+                                  (start_minute >= 10
+                                      ? start_minute.toString()
+                                      : "0" + start_minute.toString()) +
+                                  " " +
+                                  snapshot.data?.docs[index]['start_period'] +
+                                  ' - ' +
+                                  (end_hour >= 10
+                                      ? end_hour.toString()
+                                      : "0" + end_hour.toString()) +
+                                  ":" +
+                                  (end_minute >= 10
+                                      ? end_minute.toString()
+                                      : "0" + end_minute.toString()) +
+                                  " " +
+                                  snapshot.data?.docs[index]['end_period'],
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontFamily: 'SFProDisplay',
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Container(
-                        width: 80,
-                        child: IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () async {
-                            await FirebaseFirestore.instance
-                                .collection('event')
-                                .doc(snapshot.data?.docs[index].id)
-                                .delete();
-                          },
+                      Flexible(
+                        flex: 1,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditEvent(
+                                      id: id,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () async {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Delete'),
+                                      content: Text(
+                                        'Are you sure you want to delete this event?',
+                                        style: bodyStyle.copyWith(
+                                            fontFamily: 'SFProDisplay'),
+                                      ),
+                                      actions: <Widget>[
+                                        ElevatedButton(
+                                          child: Text(
+                                            'Cancel',
+                                            style: bodyStyle.copyWith(
+                                                fontFamily: 'SFProDisplay'),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            primary: Colors.red,
+                                          ),
+                                          child: Text(
+                                            'Delete',
+                                            style: bodyStyle.copyWith(
+                                                fontFamily: 'SFProDisplay'),
+                                          ),
+                                          onPressed: () async {
+                                            await FirebaseFirestore.instance
+                                                .collection('event')
+                                                .doc(snapshot
+                                                    .data?.docs[index].id)
+                                                .delete();
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -168,11 +250,11 @@ class _CalendarPageState extends State<CalendarPage> {
               children: [
                 Text(
                   DateFormat.yMMMMd().format(DateTime.now()),
-                  style: subHeadingStyle,
+                  style: subHeadingStyle.copyWith(fontFamily: 'SFProDisplay'),
                 ),
                 Text(
                   "Today",
-                  style: headingStyle,
+                  style: headingStyle.copyWith(fontFamily: 'SFProDisplay'),
                 ),
               ],
             ),
@@ -190,7 +272,10 @@ class _CalendarPageState extends State<CalendarPage> {
                     MaterialPageRoute(
                         builder: (context) => const AddTaskPage()));
               },
-              child: Text('+Add Task')),
+              child: Text(
+                '+Add Task',
+                style: bodyStyle.copyWith(fontFamily: 'SFProDisplay'),
+              )),
         ],
       ),
     );

@@ -42,6 +42,7 @@ dependencies:
   date_picker_timeline:
   flutter_local_notifications: ^9.1.5
   flutter_native_timezone:
+  flutter_staggered_animations:
   syncfusion_flutter_calendar: ^19.4.42
   intl: ^0.17.0
   provider: ^5.0.0
@@ -74,6 +75,11 @@ flutter:
   assets:
     - images/
   #   - images/a_dot_ham.jpeg
+  fonts:
+    - family: SFProDisplay
+      fonts:
+        - asset: assets/fonts/SF-Pro-Display-Black.ttf
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

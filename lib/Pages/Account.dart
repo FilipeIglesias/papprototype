@@ -28,7 +28,7 @@ class _AccountState extends State<Account> {
                       child: Text(
                         'Settings',
                         textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 40),
+                        style: TextStyle(fontSize: 35, fontFamily: 'SFProDisplay', fontWeight: FontWeight.bold),
                       ),
                     ),
                     Padding(

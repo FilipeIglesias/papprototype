@@ -8,20 +8,27 @@ import 'package:papprototype/ui/widgets/input_field.dart';
 
 class editEvent extends StatefulWidget {
   final AsyncSnapshot<QuerySnapshot<Object?>> snap;
-  const editEvent(this.snap, {super.key});
+  final String? id;
+  const editEvent({Key? key, required this.snap, required this.id})
+      : super(key: key);
 
   @override
   State<editEvent> createState() => _editEventState();
 }
 
 class _editEventState extends State<editEvent> {
+  TimeOfDay endTime1 = TimeOfDay(hour: 10, minute: 10);
+  TimeOfDay startTime1 = TimeOfDay(hour: 10, minute: 10);
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  String start_hour = "";
+  String start_minute = "";
+  String start_period = "";
+  String end_hour = "";
+  String end_minute = "";
+  String end_period = "";
+  int reminder = 0;
   DateTime _selectedDate = DateTime.now();
-  String oldStart = "";
-  String oldEnd = "";
-  String _endTime = "9.30 PM";
-  String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
   int _selectedRemind = 5;
   List<int> remindList = [
     5,
@@ -46,23 +53,30 @@ class _editEventState extends State<editEvent> {
             child: StreamBuilder<QuerySnapshot>(
                 stream:
                     FirebaseFirestore.instance.collection('event').snapshots(),
-                builder: (context, snap1) {
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   return ListView.builder(
                       itemCount: 1,
                       itemBuilder: (context, index) {
-                        String id = widget.snap.data?.docs[index]['id'];
+                        String? id = widget.id;
+                        id = widget.snap.data?.docs[index]['id'];
                         String oldTitle =
                             widget.snap.data?.docs[index]['title'];
                         String oldNote = widget.snap.data?.docs[index]['note'];
                         Timestamp oldDate =
                             widget.snap.data?.docs[index]['date'];
                         DateTime oldDay = oldDate.toDate();
-                        String oldStart =
-                            widget.snap.data?.docs[index]['start'];
-                        String oldEnd = widget.snap.data?.docs[index]['end'];
-                        int oldRemind =
-                            widget.snap.data?.docs[index]['reminder'];
-                        int currentRemind = oldRemind;
+                        start_hour =
+                            widget.snap.data?.docs[index]['start_hour'];
+                        start_minute =
+                            widget.snap.data?.docs[index]['start_minute'];
+                        start_period =
+                            widget.snap.data?.docs[index]['start_period'];
+                        end_hour = widget.snap.data?.docs[index]['end_hour'];
+                        end_minute =
+                            widget.snap.data?.docs[index]['end_minute'];
+                        end_period =
+                            widget.snap.data?.docs[index]['end_period'];
+                        reminder = widget.snap.data?.docs[index]['reminder'];
                         String oldRepeat =
                             widget.snap.data?.docs[index]['repeat'];
 
@@ -95,8 +109,8 @@ class _editEventState extends State<editEvent> {
                                           ),
                                           MyInputField(
                                             title: "Date",
-                                            hint:
-                                                DateFormat.yMMMMd().format(oldDay),
+                                            hint: DateFormat.yMMMMd()
+                                                .format(oldDay),
                                             widget: IconButton(
                                               icon: Icon(
                                                 Icons.calendar_today_outlined,
@@ -112,16 +126,40 @@ class _editEventState extends State<editEvent> {
                                               Expanded(
                                                 child: MyInputField(
                                                   title: "Start Date",
-                                                  hint: _startTime,
+                                                  hint: start_hour +
+                                                      ":" +
+                                                      start_minute +
+                                                      " " +
+                                                      start_period
+                                                          .toUpperCase(),
                                                   widget: IconButton(
                                                     icon: Icon(
                                                       Icons.access_time_rounded,
                                                       color: Colors.grey,
                                                     ),
-                                                    onPressed: (() {
-                                                      _getTimeFromUser(
-                                                          isStartTime: true);
-                                                    }),
+                                                    onPressed: () async {
+                                                      TimeOfDay? newTime =
+                                                          await showTimePicker(
+                                                              context: context,
+                                                              initialTime:
+                                                                  startTime1);
+                                                      if (newTime == null)
+                                                        return;
+
+                                                      setState(() {
+                                                        startTime1 = newTime;
+                                                        start_hour = startTime1
+                                                            .hourOfPeriod
+                                                            .toString();
+                                                        start_minute =
+                                                            startTime1.minute
+                                                                .toString();
+                                                        start_period =
+                                                            startTime1.period
+                                                                .toString()
+                                                                .toUpperCase();
+                                                      });
+                                                    },
                                                   ),
                                                 ),
                                               ),
@@ -131,16 +169,40 @@ class _editEventState extends State<editEvent> {
                                               Expanded(
                                                 child: MyInputField(
                                                   title: "End Date",
-                                                  hint: _endTime,
+                                                  hint: end_hour +
+                                                      ":" +
+                                                      end_minute +
+                                                      " " +
+                                                      end_period.toUpperCase(),
                                                   widget: IconButton(
                                                     icon: Icon(
                                                       Icons.access_time_rounded,
                                                       color: Colors.grey,
                                                     ),
-                                                    onPressed: (() {
-                                                      _getTimeFromUser(
-                                                          isStartTime: false);
-                                                    }),
+                                                    onPressed: () async {
+                                                      TimeOfDay? newTime =
+                                                          await showTimePicker(
+                                                              context: context,
+                                                              initialTime:
+                                                                  endTime1);
+                                                      if (newTime == null)
+                                                        return;
+
+                                                      setState(() {
+                                                        endTime1 = newTime;
+                                                        end_hour = endTime1
+                                                            .hourOfPeriod
+                                                            .toString();
+                                                        end_minute = endTime1
+                                                            .minute
+                                                            .toString();
+                                                        end_period = endTime1
+                                                            .period
+                                                            .toString()
+                                                            .toUpperCase();
+                                                        reminder = 0;
+                                                      });
+                                                    },
                                                   ),
                                                 ),
                                               ),
@@ -148,7 +210,7 @@ class _editEventState extends State<editEvent> {
                                           ),
                                           MyInputField(
                                             title: "Reminder",
-                                            hint: "$currentRemind minutes early",
+                                            hint: "$reminder minutes early",
                                             widget: DropdownButton(
                                               icon: Icon(
                                                 Icons.keyboard_arrow_down,
@@ -160,20 +222,24 @@ class _editEventState extends State<editEvent> {
                                               underline: Container(
                                                 height: 0,
                                               ),
-                                              items: remindList
-                                                  .map<DropdownMenuItem<String>>(
+                                              items: remindList.map<
+                                                  DropdownMenuItem<String>>(
                                                 (int value) {
-                                                  return DropdownMenuItem<String>(
+                                                  return DropdownMenuItem<
+                                                      String>(
                                                     value: value.toString(),
-                                                    child: Text(value.toString()),
+                                                    child:
+                                                        Text(value.toString()),
                                                   );
                                                 },
                                               ).toList(),
                                               onChanged: (String? newValue) {
+                                                if (newValue == null) return;
                                                 setState(() {
-                                                  _selectedRemind =
-                                                      int.parse(newValue!);
-                                                  currentRemind = _selectedRemind;
+                                                  print(newValue);
+                                                  reminder =
+                                                      int.parse(newValue);
+                                                  print(reminder);
                                                 });
                                               },
                                             ),
@@ -192,14 +258,16 @@ class _editEventState extends State<editEvent> {
                                               underline: Container(
                                                 height: 0,
                                               ),
-                                              items: repeatList
-                                                  .map<DropdownMenuItem<String>>(
+                                              items: repeatList.map<
+                                                  DropdownMenuItem<String>>(
                                                 (String? value) {
-                                                  return DropdownMenuItem<String>(
+                                                  return DropdownMenuItem<
+                                                      String>(
                                                     value: value.toString(),
                                                     child: Text(value!,
                                                         style: TextStyle(
-                                                            color: Colors.grey)),
+                                                            color:
+                                                                Colors.grey)),
                                                   );
                                                 },
                                               ).toList(),
@@ -225,7 +293,8 @@ class _editEventState extends State<editEvent> {
                                                   fixedSize: Size(120, 60),
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius:
-                                                        BorderRadius.circular(20),
+                                                        BorderRadius.circular(
+                                                            20),
                                                   )),
                                               onPressed: () {
                                                 _validateDate();
@@ -264,35 +333,6 @@ class _editEventState extends State<editEvent> {
     }
   }
 
-  _getTimeFromUser({required bool isStartTime}) async {
-    var pickedTime = await _showTimePicker();
-    String _formatedTime = pickedTime.format(context);
-    if (pickedTime == null) {
-      print("Time Canceled");
-    } else if (isStartTime == true) {
-      setState(() {
-        oldStart = _formatedTime;
-        _startTime = _formatedTime;
-      });
-    } else if (isStartTime == false) {
-      setState(() {
-        oldEnd = _formatedTime;
-        _endTime = _formatedTime;
-      });
-    }
-  }
-
-  _showTimePicker() {
-    return showTimePicker(
-      initialEntryMode: TimePickerEntryMode.input,
-      context: context,
-      initialTime: TimeOfDay(
-        hour: int.parse(_startTime.split(":")[0]),
-        minute: int.parse(_startTime.split(":")[1].split(" ")[0]),
-      ),
-    );
-  }
-
   void _updateEvent() async {
     try {
       await FirebaseFirestore.instance
@@ -302,9 +342,13 @@ class _editEventState extends State<editEvent> {
         'title': _titleController.text,
         'note': _noteController.text,
         'date': Timestamp.fromDate(_selectedDate),
-        'start': _startTime,
-        'end': _endTime,
-        'reminder': _selectedRemind,
+        'start_hour': startTime1.hourOfPeriod.toString(),
+        'start_minute': startTime1.minute.toString(),
+        'start_period': startTime1.period.name.toString().toUpperCase(),
+        'end_hour': endTime1.hourOfPeriod.toString(),
+        'end_minute': endTime1.minute.toString(),
+        'end_period': endTime1.period.name.toString().toUpperCase(),
+        'reminder': reminder,
         'repeat': _selectedRepeat,
       });
       Get.back();

@@ -27,8 +27,8 @@ class TaskInfoView extends StatelessWidget {
                       flex: 2,
                       child: Align(
                         alignment: Alignment.center,
-                        child: FutureBuilder<int?>(
-                          future: viewModel.numTasks(),
+                        child: StreamBuilder<int?>(
+                          stream: viewModel.numTask(),
                           builder: (BuildContext context,
                               AsyncSnapshot<int?> snapshot) {
                             if (snapshot.hasData) {

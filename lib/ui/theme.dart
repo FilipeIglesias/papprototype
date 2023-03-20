@@ -48,3 +48,13 @@ TextStyle get subTitleStyle {
     ),
   );
 }
+
+TextStyle get bodyStyle {
+  return GoogleFonts.lato(
+    textStyle: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: Colors.white,
+    ),
+  );
+}

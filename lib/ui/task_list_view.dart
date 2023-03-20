@@ -49,8 +49,11 @@ class _TaskListViewState extends State<TaskListView> {
 
                   return Dismissible(
                     key: UniqueKey(),
-                    onDismissed: (direction) {
-                      viewModel.deleteTask(index);
+                    onDismissed: (direction) async {
+                      await FirebaseFirestore.instance
+                          .collection('reminders') // Use 'reminders' collection
+                          .doc(snapshot.data?.docs[index].id)
+                          .delete();
                     },
                     background: Container(
                       margin: EdgeInsets.symmetric(horizontal: 5),
@@ -81,7 +84,8 @@ class _TaskListViewState extends State<TaskListView> {
                           side: BorderSide(width: 2, color: viewModel.clrvl3),
                           checkColor: viewModel.clrvl1,
                           activeColor: viewModel.clrvl3,
-                          value: _completedTasks[id] ?? false, // Use the stored completed state
+                          value: _completedTasks[id] ??
+                              false, // Use the stored completed state
                           onChanged: (newValue) async {
                             setState(() {
                               _completedTasks[id] = newValue ?? false;
@@ -111,16 +115,16 @@ class _TaskListViewState extends State<TaskListView> {
                   );
                 },
                 itemCount: documents.length,
-                separatorBuilder: (context, index) {
-                  return SizedBox(
-                    height: 15,
-                  );
-                },
-              ),
-            );
-          },
+                separatorBuilder: (context, index){
+              return SizedBox(
+                height: 15,
+              );
+            },
+          ),
         );
       },
     );
-  }
+  },
+);
+}
 }

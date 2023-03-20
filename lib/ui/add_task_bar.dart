@@ -17,8 +17,12 @@ class AddTaskPage extends StatefulWidget {
 class _AddTaskPageState extends State<AddTaskPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  TimeOfDay startTime1 = TimeOfDay(hour: 10, minute: 10);
+  TimeOfDay endTime1 = TimeOfDay(hour: 10, minute: 10);
   DateTime _selectedDate = DateTime.now();
-  String _endTime = "9.30 PM";
+  String _endTime = DateFormat("hh:mm a")
+      .format(DateTime.now().add(Duration(hours: 1)))
+      .toString();
   String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
   int _selectedRemind = 5;
   List<int> remindList = [
@@ -81,16 +85,26 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 children: [
                   Expanded(
                     child: MyInputField(
-                      title: "Start Date",
-                      hint: _startTime,
+                      title: "Start Time",
+                      hint: startTime1.hourOfPeriod.toString() +
+                          ":" +
+                          startTime1.minute.toString() +
+                          " " +
+                          startTime1.period.name.toString().toUpperCase(),
                       widget: IconButton(
                         icon: Icon(
                           Icons.access_time_rounded,
                           color: Colors.grey,
                         ),
-                        onPressed: (() {
-                          _getTimeFromUser(isStartTime: true);
-                        }),
+                        onPressed: () async {
+                          TimeOfDay? newTime = await showTimePicker(
+                              context: context, initialTime: startTime1);
+                          if (newTime == null) return;
+
+                          setState(() {
+                            startTime1 = newTime;
+                          });
+                        },
                       ),
                     ),
                   ),
@@ -99,16 +113,26 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   ),
                   Expanded(
                     child: MyInputField(
-                      title: "End Date",
-                      hint: _endTime,
+                      title: "End Time",
+                      hint: endTime1.hourOfPeriod.toString() +
+                          ":" +
+                          endTime1.minute.toString() +
+                          " " +
+                          endTime1.period.name.toString().toUpperCase(),
                       widget: IconButton(
                         icon: Icon(
                           Icons.access_time_rounded,
                           color: Colors.grey,
                         ),
-                        onPressed: (() {
-                          _getTimeFromUser(isStartTime: false);
-                        }),
+                        onPressed: () async {
+                          TimeOfDay? newTime = await showTimePicker(
+                              context: context, initialTime: endTime1);
+                          if (newTime == null) return;
+
+                          setState(() {
+                            endTime1 = newTime;
+                          });
+                        },
                       ),
                     ),
                   ),
@@ -210,8 +234,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
       "title": _titleController.text,
       "note": _noteController.text,
       "date": _selectedDate,
-      "start": _startTime,
-      "end": _endTime,
+      "start_hour": startTime1.hourOfPeriod.toString(),
+      "start_minute": startTime1.minute.toString(),
+      "start_period": startTime1.period.name.toString().toUpperCase(),
+      "end_hour": endTime1.hourOfPeriod.toString(),
+      "end_minute": endTime1.minute.toString(),
+      "end_period": endTime1.period.name.toString().toUpperCase(),
       "reminder": _selectedRemind,
       "repeat": _selectedRepeat,
     };
@@ -292,8 +320,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       backgroundColor: Colors.white,
       leading: GestureDetector(
         onTap: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const CalendarPage()));
+          Navigator.pop(context);
         },
         child: Icon(
           Icons.arrow_back_ios,
@@ -333,31 +360,4 @@ class _AddTaskPageState extends State<AddTaskPage> {
     }
   }
 
-  //Hour
-  _getTimeFromUser({required bool isStartTime}) async {
-    var pickedTime = await _showTimePicker();
-    String _formatedTime = pickedTime.format(context);
-    if (pickedTime == null) {
-      print("Time Canceled");
-    } else if (isStartTime == true) {
-      setState(() {
-        _startTime = _formatedTime;
-      });
-    } else if (isStartTime == false) {
-      setState(() {
-        _endTime = _formatedTime;
-      });
-    }
-  }
-
-  _showTimePicker() {
-    return showTimePicker(
-      initialEntryMode: TimePickerEntryMode.input,
-      context: context,
-      initialTime: TimeOfDay(
-        hour: int.parse(_startTime.split(":")[0]),
-        minute: int.parse(_startTime.split(":")[1].split(" ")[0]),
-      ),
-    );
-  }
 }
