@@ -5,12 +5,14 @@ class Event {
   final String title;
   final String note;
   final DateTime date;
+  final String start_time;
+  final String end_time;
   final String start_hour;
   final String start_minute;
   final String start_period;
-  String end_hour;
-  String end_minute;
-  String end_period;
+  final String end_hour;
+  final String end_minute;
+  final String end_period;
   final int reminder;
   final String repeat;
 
@@ -19,6 +21,8 @@ class Event {
     required this.title,
     required this.note,
     required this.date,
+    required this.start_time,
+    required this.end_time,
     required this.start_hour,
     required this.start_minute,
     required this.start_period,
@@ -35,6 +39,8 @@ class Event {
       title: doc['title'],
       note: doc['note'],
       date: (doc['date'] as Timestamp).toDate(),
+      start_time: doc['start_time'],
+      end_time: doc['end_time'],
       start_hour: doc['start_hour'],
       start_minute: doc['start_minute'],
       start_period: doc['start_period'],

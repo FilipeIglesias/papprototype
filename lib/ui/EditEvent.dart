@@ -100,7 +100,6 @@ class _EditEventState extends State<EditEvent> {
               if (repeat == "") {
                 repeat = event.repeat;
               }
-
               return Container(
                 padding: const EdgeInsets.only(
                   left: 20,
@@ -134,6 +133,7 @@ class _EditEventState extends State<EditEvent> {
                             color: Colors.grey,
                           ),
                           onPressed: () async {
+                            print(_selectedDate);
                             await _getDateFromUser(_selectedDate);
                           },
                         ),
@@ -204,11 +204,9 @@ class _EditEventState extends State<EditEvent> {
 
                                   setState(() {
                                     endTime = newTime;
-                                    event.end_hour =
-                                        endTime.hourOfPeriod.toString();
-                                    event.end_minute =
-                                        endTime.minute.toString();
-                                    event.end_period =
+                                    end_hour = endTime.hourOfPeriod.toString();
+                                    end_minute = endTime.minute.toString();
+                                    end_period =
                                         endTime.period.toString().toUpperCase();
 
                                     end_hour = endTime.hourOfPeriod.toString();

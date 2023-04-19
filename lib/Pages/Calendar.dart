@@ -1,18 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_picker_timeline/date_picker_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:papprototype/services/firebase_messaging_services.dart';
 import 'package:papprototype/ui/add_task_bar.dart';
 import 'package:papprototype/ui/theme.dart';
 import 'package:papprototype/ui/widgets/input_field.dart';
+import 'package:provider/provider.dart';
+import '../services/notification_services.dart';
 import '../ui/edit_event.dart';
 import '../ui/EditEvent.dart';
+import 'package:papprototype/services/notification_services.dart';
 
 class CalendarPage extends StatefulWidget {
-  const CalendarPage({super.key});
+  final FirebaseAuth auth;
+  const CalendarPage({super.key, required this.auth});
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();
@@ -20,6 +26,43 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   DateTime _selectedDate = DateTime.now();
+  FirebaseAuth auth = FirebaseAuth.instance;
+  TimeOfDay now = TimeOfDay.now();
+
+  NotificationService notificationService = NotificationService();
+
+  void initState() {
+    super.initState();
+    Provider.of<NotificationService>(context, listen: false).initialize();
+    initilizeFirebaseMessaging();
+    checkNotifications();
+    _initializeNotifications(); // call this method to initialize FlutterLocalNotificationsPlugin
+  }
+
+  bool valor = false;
+
+  showNotification() {
+    setState(() {
+      Provider.of<NotificationService>(context, listen: false).showNotification(
+          CustomNotification(
+              id: 1, title: 'Teste', body: '1234', payload: '/home'));
+    });
+  }
+
+  _initializeNotifications() async {
+    await notificationService.initialize();
+  }
+
+  initilizeFirebaseMessaging() async {
+    await Provider.of<FirebaseMessagingService>(context, listen: false)
+        .initialize();
+  }
+
+  checkNotifications() async {
+    await notificationService.checkForNotifications();
+  }
+
+  final currentuid = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +86,16 @@ class _CalendarPageState extends State<CalendarPage> {
   _showTasks() {
     return Expanded(
       child: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('event').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('event')
+            .where('uid', isEqualTo: currentuid)
+            .where('year', isEqualTo: _selectedDate.year)
+            .where('month', isEqualTo: _selectedDate.month)
+            .where('day', isEqualTo: _selectedDate.day)
+            .orderBy('start_period', descending: false)
+            .orderBy('start_hour', descending: false)
+            .orderBy('start_minute', descending: false)
+            .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
@@ -52,10 +104,23 @@ class _CalendarPageState extends State<CalendarPage> {
                 String? id = snapshot.data?.docs[index]['id'];
                 Timestamp t = snapshot.data?.docs[index]['date'];
                 DateTime d = t.toDate();
-                int start_hour = int.parse(snapshot.data?.docs[index]['start_hour']);
-                int start_minute = int.parse(snapshot.data?.docs[index]['start_minute']);
-                int end_hour = int.parse(snapshot.data?.docs[index]['end_hour']);
-                int end_minute = int.parse(snapshot.data?.docs[index]['end_minute']);
+                int start_hour =
+                    int.parse(snapshot.data?.docs[index]['start_hour']);
+                int start_minute =
+                    int.parse(snapshot.data?.docs[index]['start_minute']);
+                int end_hour =
+                    int.parse(snapshot.data?.docs[index]['end_hour']);
+                int end_minute =
+                    int.parse(snapshot.data?.docs[index]['end_minute']);
+                String uid = snapshot.data?.docs[index]['uid'];
+                /* String timeString = snapshot.data?.docs[index]['start_time'];
+                DateTime time = DateFormat('HH:mm').parse(timeString);*/
+                TimeOfDay currentTime = TimeOfDay.now();
+
+                if (now.hour == start_hour && now.minute == start_minute) {
+                  showNotification(); // create the notification
+                }
+
                 return Container(
                   padding: EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
@@ -227,7 +292,9 @@ class _CalendarPageState extends State<CalendarPage> {
           color: Colors.grey,
         ),
         onDateChange: (date) {
-          _selectedDate = date;
+          setState(() {
+            _selectedDate = date;
+          });
         },
       ),
     );
@@ -270,7 +337,9 @@ class _CalendarPageState extends State<CalendarPage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const AddTaskPage()));
+                        builder: (context) => AddTaskPage(
+                              auth: FirebaseAuth.instance,
+                            )));
               },
               child: Text(
                 '+Add Task',

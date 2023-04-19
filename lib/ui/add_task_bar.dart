@@ -4,11 +4,14 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:papprototype/ui/theme.dart';
 import 'package:papprototype/ui/widgets/input_field.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../Pages/Calendar.dart';
 
 class AddTaskPage extends StatefulWidget {
-  const AddTaskPage({super.key});
+  final FirebaseAuth auth;
+
+  AddTaskPage({required this.auth, Key? key}) : super(key: key);
 
   @override
   State<AddTaskPage> createState() => _AddTaskPageState();
@@ -40,6 +43,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
   ];
   int _selectedColor = 0;
   bool _allRequired = false;
+
+  FirebaseAuth auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -231,9 +237,15 @@ class _AddTaskPageState extends State<AddTaskPage> {
   _sendEvent() {
     final event = <String, dynamic>{
       "id": null,
+      "uid": null,
       "title": _titleController.text,
       "note": _noteController.text,
       "date": _selectedDate,
+      "year": _selectedDate.year,
+      "month": _selectedDate.month,
+      "day": _selectedDate.day,
+      "start_time": startTime1.toString(),
+      "end_time": endTime1.toString(),
       "start_hour": startTime1.hourOfPeriod.toString(),
       "start_minute": startTime1.minute.toString(),
       "start_period": startTime1.period.name.toString().toUpperCase(),
@@ -249,6 +261,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
     FirebaseFirestore.instance.collection("event").add(event).then(
       (DocumentReference doc) {
         doc.update({"id": doc.id});
+
+        final uid = widget.auth.currentUser!.uid;
+        doc.update({"uid": uid});
         print('DocumentSnapshot added with ID: ${doc.id}');
       },
     );
@@ -359,5 +374,4 @@ class _AddTaskPageState extends State<AddTaskPage> {
       print("It´s null or something is wrong");
     }
   }
-
 }

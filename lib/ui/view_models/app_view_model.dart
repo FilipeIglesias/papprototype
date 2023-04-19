@@ -1,56 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../models/task_model.dart';
 
 class AppViewModel extends ChangeNotifier {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final currentuid = FirebaseAuth.instance.currentUser!.uid;
   List<Task> tasks = <Task>[];
 
   Color clrvl1 = Colors.grey.shade50;
   Color clrvl2 = Colors.grey.shade200;
   Color clrvl3 = Colors.grey.shade800;
   Color clrvl4 = Colors.grey.shade900;
-
-  Future<int> numTasks() async {
-    int numTasks;
-    try {
-      final QuerySnapshot<Map<String, dynamic>> snapshot =
-          await FirebaseFirestore.instance.collection('reminders').get();
-
-      numTasks = snapshot.size;
-      return numTasks;
-    } catch (e) {
-      print('Error getting snapshot count: $e');
-      return 0;
-    }
-  }
-
-  Stream<int> numTask() {
-    return FirebaseFirestore.instance
-        .collection('reminders')
-        .snapshots()
-        .map((snapshot) {
-          final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
-          snapshot.docs;
-           final int numRemaining =
-          documents.length;
-      return numRemaining;
-    });
-  }
-
-  Stream<int> numTasksRemaining() {
-    return FirebaseFirestore.instance
-        .collection('reminders')
-        .snapshots()
-        .map((snapshot) {
-      final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
-          snapshot.docs;
-      final int numRemaining =
-          documents.where((doc) => doc['completed'] == false).length;
-      return numRemaining;
-    });
-  }
 
   Future<List<bool>> getCompletedValues() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -86,11 +49,9 @@ class AppViewModel extends ChangeNotifier {
         .catchError((error) => print('Error updating task completion: $error'));
   }
 
-  void deleteTask(int taskIndex) {}
-
   void deleteAllTasks() async {
     final QuerySnapshot remindersSnapshot =
-        await FirebaseFirestore.instance.collection('reminders').get();
+        await FirebaseFirestore.instance.collection('reminders').where('uid', isEqualTo: currentuid).get();
 
     final List<DocumentSnapshot> remindersDocs = remindersSnapshot.docs;
 
@@ -102,7 +63,7 @@ class AppViewModel extends ChangeNotifier {
   void deleteCompletedTasks() async {
     try {
       final snapshot =
-          await FirebaseFirestore.instance.collection('reminders').get();
+          await FirebaseFirestore.instance.collection('reminders').where('uid', isEqualTo: currentuid).get();
       final docs = snapshot.docs;
       final completedDocs = docs.where((doc) => doc['completed'] == true);
 
@@ -124,6 +85,7 @@ class AppViewModel extends ChangeNotifier {
     final taskMap = <String, dynamic>{
       "title": newTask.title,
       "completed": false,
+      "uid": null,
     };
 
     FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -132,6 +94,7 @@ class AppViewModel extends ChangeNotifier {
         .add(taskMap)
         .then((DocumentReference doc) {
       doc.update({"id": doc.id});
+      doc.update({"uid": currentuid});
       print('DocumentSnapshot added with ID: ${doc.id}');
     }).catchError((error) {
       print('Error adding task: $error');

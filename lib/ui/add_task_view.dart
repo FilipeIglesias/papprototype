@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:papprototype/ui/bottom_sheets/add_task_bottom_sheet_view.dart';
@@ -6,7 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:papprototype/main.dart';
 
 class AddTaskView extends StatelessWidget {
-  const AddTaskView({super.key});
+  final FirebaseAuth auth;
+  const AddTaskView({super.key, required this.auth});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class AddTaskView extends StatelessWidget {
           ),
           onPressed: () {
             viewModel.bottomSheetBuilder(
-                const AddTaskBottomSheetView(), context);
+                 AddTaskBottomSheetView(auth: auth,), context);
           },
         ),
       );

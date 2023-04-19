@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,7 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TaskListView extends StatefulWidget {
-  const TaskListView({Key? key});
+  final FirebaseAuth auth;
+  const TaskListView({Key? key, required this.auth});
 
   @override
   State<TaskListView> createState() => _TaskListViewState();
@@ -15,13 +17,15 @@ class TaskListView extends StatefulWidget {
 class _TaskListViewState extends State<TaskListView> {
   Map<String, bool> _completedTasks = {};
 
+  final currentuid = FirebaseAuth.instance.currentUser!.uid;
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppViewModel>(
       builder: (context, viewModel, child) {
         return StreamBuilder<QuerySnapshot>(
           stream:
-              FirebaseFirestore.instance.collection('reminders').snapshots(),
+              FirebaseFirestore.instance.collection('reminders').where('uid', isEqualTo: currentuid).snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return Center(
@@ -30,6 +34,8 @@ class _TaskListViewState extends State<TaskListView> {
             }
 
             final documents = snapshot.data!.docs;
+
+            // Filter reminders by user id
 
             return Container(
               decoration: BoxDecoration(
@@ -44,87 +50,87 @@ class _TaskListViewState extends State<TaskListView> {
                   final completed = document['completed'] as bool?;
                   final id = document['id'] as String?;
 
-                  // Store the completed state of each task in a map
-                  _completedTasks[id!] = completed ?? false;
+                    _completedTasks[id!] = completed ?? false;
 
-                  return Dismissible(
-                    key: UniqueKey(),
-                    onDismissed: (direction) async {
-                      await FirebaseFirestore.instance
-                          .collection('reminders') // Use 'reminders' collection
-                          .doc(snapshot.data?.docs[index].id)
-                          .delete();
-                    },
-                    background: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.delete,
-                          color: Colors.red.shade700,
+                    return Dismissible(
+                      key: UniqueKey(),
+                      onDismissed: (direction) async {
+                        await FirebaseFirestore.instance
+                            .collection(
+                                'reminders') // Use 'reminders' collection
+                            .doc(snapshot.data?.docs[index].id)
+                            .delete();
+                      },
+                      background: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.delete,
+                            color: Colors.red.shade700,
+                          ),
                         ),
                       ),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: viewModel.clrvl1,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: ListTile(
-                        onTap: () {
-                          viewModel.getTaskValue(index);
-                        },
-                        leading: Checkbox(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          side: BorderSide(width: 2, color: viewModel.clrvl3),
-                          checkColor: viewModel.clrvl1,
-                          activeColor: viewModel.clrvl3,
-                          value: _completedTasks[id] ??
-                              false, // Use the stored completed state
-                          onChanged: (newValue) async {
-                            setState(() {
-                              _completedTasks[id] = newValue ?? false;
-                            });
-                            try {
-                              await FirebaseFirestore.instance
-                                  .collection('reminders')
-                                  .doc(id)
-                                  .update({
-                                'completed': _completedTasks[id],
-                              });
-                            } catch (e) {
-                              print('Error updating checkbox state: $e');
-                            }
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: viewModel.clrvl1,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: ListTile(
+                          onTap: () {
+                            viewModel.getTaskValue(index);
                           },
-                        ),
-                        title: Text(
-                          title!,
-                          style: TextStyle(
-                            color: viewModel.clrvl4,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
+                          leading: Checkbox(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            side: BorderSide(width: 2, color: viewModel.clrvl3),
+                            checkColor: viewModel.clrvl1,
+                            activeColor: viewModel.clrvl3,
+                            value: _completedTasks[id] ??
+                                false, // Use the stored completed state
+                            onChanged: (newValue) async {
+                              setState(() {
+                                _completedTasks[id] = newValue ?? false;
+                              });
+                              try {
+                                await FirebaseFirestore.instance
+                                    .collection('reminders')
+                                    .doc(id)
+                                    .update({
+                                  'completed': _completedTasks[id],
+                                });
+                              } catch (e) {
+                                print('Error updating checkbox state: $e');
+                              }
+                            },
+                          ),
+                          title: Text(
+                            title!,
+                            style: TextStyle(
+                              color: viewModel.clrvl4,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
+                    );
                 },
                 itemCount: documents.length,
-                separatorBuilder: (context, index){
-              return SizedBox(
-                height: 15,
-              );
-            },
-          ),
+                separatorBuilder: (context, index) {
+                  return SizedBox(
+                    height: 15,
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );
-  },
-);
-}
+  }
 }
